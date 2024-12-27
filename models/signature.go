@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/fardream/go-bcs/bcs"
 	"log"
 	"strings"
 
@@ -131,7 +132,7 @@ func messageWithIntent(message []byte) []byte {
 	intent := IntentBytes
 	intentMessage := make([]byte, len(intent)+len(message))
 	copy(intentMessage, intent)
-	copy(intentMessage[len(intent):], message)
+	copy(intentMessage[len(intent):], bcs.MustMarshal(message))
 	return intentMessage
 }
 

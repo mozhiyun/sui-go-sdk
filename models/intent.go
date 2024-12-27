@@ -1,6 +1,9 @@
 package models
 
-import "github.com/block-vision/sui-go-sdk/constant"
+import (
+	"github.com/block-vision/sui-go-sdk/constant"
+	"github.com/fardream/go-bcs/bcs"
+)
 
 type AppId int
 
@@ -22,6 +25,6 @@ func NewMessageWithIntent(message []byte, scope constant.IntentScope) []byte {
 	intent := []byte{scope, 0, 0}
 	intentMessage := make([]byte, len(intent)+len(message))
 	copy(intentMessage, intent)
-	copy(intentMessage[len(intent):], message)
+	copy(intentMessage[len(intent):], bcs.MustMarshal(message))
 	return intentMessage
 }

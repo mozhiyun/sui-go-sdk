@@ -130,9 +130,10 @@ func (txn *TxnMetaData) SignSerializedSigWith(privateKey ed25519.PrivateKey) *Si
 
 func messageWithIntent(message []byte) []byte {
 	intent := IntentBytes
-	intentMessage := make([]byte, len(intent)+len(message))
+	messageBCS := bcs.MustMarshal(message)
+	intentMessage := make([]byte, len(intent)+len(messageBCS))
 	copy(intentMessage, intent)
-	copy(intentMessage[len(intent):], bcs.MustMarshal(message))
+	copy(intentMessage[len(intent):], messageBCS)
 	return intentMessage
 }
 

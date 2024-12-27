@@ -23,8 +23,9 @@ func IntentWithScope(intentScope constant.IntentScope) []int {
 
 func NewMessageWithIntent(message []byte, scope constant.IntentScope) []byte {
 	intent := []byte{scope, 0, 0}
-	intentMessage := make([]byte, len(intent)+len(message))
+	messageBCS := bcs.MustMarshal(message)
+	intentMessage := make([]byte, len(intent)+len(messageBCS))
 	copy(intentMessage, intent)
-	copy(intentMessage[len(intent):], bcs.MustMarshal(message))
+	copy(intentMessage[len(intent):], messageBCS)
 	return intentMessage
 }

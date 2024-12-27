@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/fardream/go-bcs/bcs"
 	"log"
 	"strings"
 
@@ -130,10 +129,9 @@ func (txn *TxnMetaData) SignSerializedSigWith(privateKey ed25519.PrivateKey) *Si
 
 func messageWithIntent(message []byte) []byte {
 	intent := IntentBytes
-	messageBCS := bcs.MustMarshal(message)
-	intentMessage := make([]byte, len(intent)+len(messageBCS))
+	intentMessage := make([]byte, len(intent)+len(message))
 	copy(intentMessage, intent)
-	copy(intentMessage[len(intent):], messageBCS)
+	copy(intentMessage[len(intent):], message)
 	return intentMessage
 }
 

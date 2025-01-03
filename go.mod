@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/fardream/go-bcs v0.7.0
+	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/machinebox/graphql v0.2.2

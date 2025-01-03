@@ -2,11 +2,12 @@ package zklogin
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
-	"math/big"
-
 	"github.com/machinebox/graphql"
+	"golang.org/x/crypto/blake2b"
+	"math/big"
 
 	"github.com/block-vision/sui-go-sdk/cryptography/scheme"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
@@ -18,6 +19,19 @@ type SignaturePubkeyPair struct {
 	ZkLogin             *ZkLoginSignature
 	Signature           []byte
 	PubKey              []byte
+}
+
+func (sp *SignaturePubkeyPair) VerifyPersonalMessage(message []byte, client *graphql.Client) (string, bool, error) {
+	identity := NewZkLoginPublicIdentifier(sp.PubKey, &ZkLoginPublicIdentifierOptions{Client: client})
+	// convert the public key to a Sui address
+	address := identity.ToSuiAddress()
+
+	// Convert the message to Base64
+	bytesEncoded := mystenbcs.ToBase64(message)
+
+	// Call the GraphQL verification function
+	ok, err := GraphqlVerifyZkLoginSignature(address, bytesEncoded, sp.SerializedSignature, "PERSONAL_MESSAGE", client)
+	return address, ok, err
 }
 
 type ZkLoginPublicIdentifierOptions struct {
@@ -51,7 +65,12 @@ func (p *ZkLoginPublicIdentifier) ToSuiAddress() string {
 	// );
 
 	// Convert the public identifier to a Sui address
-	return "0x" + mystenbcs.ToHex(mystenbcs.Blake2b(p.toSuiBytes(), 32))[:40]
+	//return "0x" + mystenbcs.ToHex(mystenbcs.Blake2b(p.toSuiBytes(), 32))[:40]
+	newPubkey := []byte{scheme.SignatureSchemeToFlag[scheme.ZkLogin]}
+	newPubkey = append(newPubkey, p.data...)
+
+	addrBytes := blake2b.Sum256(newPubkey)
+	return fmt.Sprintf("0x%s", hex.EncodeToString(addrBytes[:])[:64])
 }
 
 func (pk *ZkLoginPublicIdentifier) VerifyPersonalMessage(message []byte, signature []byte, client *graphql.Client) (bool, error) {
@@ -68,7 +87,7 @@ func (pk *ZkLoginPublicIdentifier) VerifyPersonalMessage(message []byte, signatu
 	bytesEncoded := mystenbcs.ToBase64(message)
 
 	// Call the GraphQL verification function
-	return GraphqlVerifyZkLoginSignature(address, bytesEncoded, string(parsedSignature.SerializedSignature), "PERSONAL_MESSAGE", client)
+	return GraphqlVerifyZkLoginSignature(address, bytesEncoded, parsedSignature.SerializedSignature, "PERSONAL_MESSAGE", client)
 }
 
 func toZkLoginPublicIdentifier(addressSeed *big.Int, iss string, options *ZkLoginPublicIdentifierOptions) *ZkLoginPublicIdentifier {
@@ -155,14 +174,12 @@ func ParseSerializedZkLoginSignature(signature interface{}) (*SignaturePubkeyPai
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ZkLoginSignature: %v", err)
 	}
-
 	// Extract necessary fields from the parsed signature
 	inputs := zkSig.Inputs
 	issBase64Details := inputs.IssBase64Details
 	addressSeed := inputs.AddressSeed
 
 	zkSig.AddressSeed = addressSeed
-
 	// Extract the claim value
 	iss, err := extractClaimValue(Claim{
 		Value:     issBase64Details.Value,

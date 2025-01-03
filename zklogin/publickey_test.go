@@ -1,0 +1,24 @@
+package zklogin
+
+import (
+	"github.com/go-playground/assert/v2"
+	"github.com/machinebox/graphql"
+	"testing"
+)
+
+func TestVerifyPersonalMessage(t *testing.T) {
+	signature := "BQNMMTc4NjY1NDUxNjk4NTc5OTI2MDE5NTk5NDgxMzM5ODY2NzU2NjkxMzk5NjgyNzIxMTE3MjE3MTkzMTQ4NjY2NTY3MTIxMDU5MjM2MEw0NTg0MzEyODE4NDYwMjE0MTI3MTc5MDY5NzM4MzM2MjY2NjEwMjU5ODA4ODg2NzMxMTU5MTI2MTc0ODk1NzUxNzEyMDgxNTY1NjA2ATEDAk0xMjc1MzU5MTMxMDU0NTg1NjYwMTUyNTUwMTQ3MzMxOTQ1MDk4MDk0NTE5MTI2MTQzNDI2MDc3NjYyMDA5MTY5OTMxMzg5MjM4MDE1M00xODU0MzUzNjAyODA1MzM0MDQ3MDUyMzIwOTcwMTcyNDM2OTU4NTk4MTYxMzg3MjY5NTg3NjQyNTg3NTcwMjg3MjE4MzgxMTk1MzkxNAJMMzMyMjAwNDQ5MDg5OTkxNDU2MTc2MDI3ODU0OTg5MDc3NTM1MzgzNzg1MDc2MTkzNjY3MzQ0NjQ3NzA5OTUwNjY2NjQ5ODEwNTk0Nk0xMTI5MDExODU1ODcxNjEwNTgzNDc1ODM0MTkyNTE0MDc5MjE5MDU4ODg1MTAxMzg3NjY1MjA3MzMyOTMwOTIwMDYxNzkwOTI0MDk4MgIBMQEwA00xNDkwMDkzMjE4MTQ1Mjg5NDA2NDc3NjcxMzA1OTcwNzY5MDQwNjIyODIxMTc3NTI2MDM3ODc3NjIxNzAxNTE5NjU3OTEzMjQ3MzQ2N0w5NjQxOTQ5NzA4NTY5OTUxNTU3NzIxNjExMTUyNDA5MDI4MzUwNzEwMjc3MjcyNzgzMTcwMTMyMDM5ODA0Mjk2Mzk2OTIxMTcxNzQ1ATExeUpwYzNNaU9pSm9kSFJ3Y3pvdkwyRmpZMjkxYm5SekxtZHZiMmRzWlM1amIyMGlMQwFmZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkltRmlPRFl4TkdabU5qSTRPVE5pWVdSalpUVmhZVGM1WVRjM01ETmlOVGsyTmpZMVpESTBOemdpTENKMGVYQWlPaUpLVjFRaWZRSzg1MzEzODgxNzYzNTkzNTg3MDk0NDQ1OTYyNDQ3MzY5NDMxMDg5NzgyMTYzNDYxNTk2MzEzMTU0NTk5MjcxOTQ4MzUxMTAzOTU0OV0CAAAAAAAAYQClbRfMLV/H94ytR0rvEIEVjpySMPcdHypE8LL5/y1R++aKj5LM4OG9rHCAtNg4+PpoTGpwHYvxmzYL20IxoZ8M2H9J63BOBeUJpgrQ0zaxshQzH6zLJTusdLcorMWQRAs="
+	signer := "0xb9d14d9a1126899e7c0489e52b1e97152cb32a4a36add0191b8aa53d67f9f6d9"
+	message := []byte("hello, World!")
+	endpoint := "https://sui-testnet.mystenlabs.com/graphql"
+	signKeyPair, err := ParseSerializedZkLoginSignature(signature)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, signKeyPair.ZkLogin.Iss, "https://accounts.google.com")
+	zkIdentityOptions := &ZkLoginPublicIdentifierOptions{
+		Client: graphql.NewClient(endpoint),
+	}
+	signerOk, pass, err := signKeyPair.VerifyPersonalMessage(message, zkIdentityOptions.Client)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, pass, true)
+	assert.Equal(t, signerOk, signer)
+}

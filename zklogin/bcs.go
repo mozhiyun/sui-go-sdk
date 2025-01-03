@@ -1,27 +1,33 @@
 package zklogin
 
 type ProofPoints struct {
-	A []string   `bcs:"a"`
-	B [][]string `bcs:"b"`
-	C []string   `bcs:"c"`
+	A []string
+	B [][]string
+	C []string
 }
 
 type IssBase64Details struct {
-	Value     string `bcs:"value"`
-	IndexMod4 uint8  `bcs:"indexMod4"`
+	Value     string
+	IndexMod4 uint8
 }
 
 type ZkLoginSignatureInputs struct {
-	ProofPoints      ProofPoints      `bcs:"proofPoints"`
-	IssBase64Details IssBase64Details `bcs:"issBase64Details"`
-	HeaderBase64     string           `bcs:"headerBase64"`
-	AddressSeed      string           `bcs:"addressSeed"`
+	ProofPoints      ProofPoints
+	IssBase64Details IssBase64Details
+	HeaderBase64     string
+	AddressSeed      string
 }
 
 type ZkLoginSignature struct {
-	Inputs        ZkLoginSignatureInputs `bcs:"inputs"`
-	MaxEpoch      uint64                 `bcs:"maxEpoch"`
-	UserSignature []byte                 `bcs:"userSignature"`
-	Iss           string                 `bcs:"iss"`
-	AddressSeed   string                 `bcs:"addressSeed"`
+	Inputs        ZkLoginSignatureInputs
+	MaxEpoch      uint64
+	UserSignature []byte
+	Iss           string
+	AddressSeed   string
+}
+
+type ZkLoginSignatureInner struct {
+	Inputs        ZkLoginSignatureInputs
+	MaxEpoch      uint64
+	UserSignature []byte
 }

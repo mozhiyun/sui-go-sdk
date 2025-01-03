@@ -94,7 +94,7 @@ func decodeBase64URL(s string, i int) (string, error) {
 		// Convert bitChunk to a byte
 		var byteValue byte
 		for j, bit := range bitChunk {
-			if bit == '1' {
+			if bit == 1 {
 				byteValue |= 1 << (7 - j)
 			}
 		}

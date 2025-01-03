@@ -2,7 +2,6 @@ package zklogin
 
 import (
 	"fmt"
-
 	"github.com/fardream/go-bcs/bcs"
 
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
@@ -26,13 +25,15 @@ func parseZkLoginSignature(signature interface{}) (*ZkLoginSignature, error) {
 	}
 
 	// Deserialize the bytes into ZkLoginSignature struct using BCS
-	var zkSig ZkLoginSignature
-	numBytes, err := bcs.Unmarshal(bytes, &zkSig)
+	var zkSigInner ZkLoginSignatureInner
+	numBytes, err := bcs.Unmarshal(bytes, &zkSigInner)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse BCS data: %v", err)
 	}
-
 	fmt.Println("Number of bytes read:", numBytes)
-
-	return &zkSig, nil
+	return &ZkLoginSignature{
+		Inputs:        zkSigInner.Inputs,
+		MaxEpoch:      zkSigInner.MaxEpoch,
+		UserSignature: zkSigInner.UserSignature,
+	}, nil
 }
